@@ -1,0 +1,41 @@
+# Credentials and local configuration
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+*.p12
+*.pfx
+id_rsa*
+id_dsa*
+id_ecdsa*
+id_ed25519*
+*cookie*
+*token*
+*secret*
+
+# Candidate and recruiting business data
+candidates/
+resumes/
+exports/
+screenshots/
+evidence/
+private-data/
+*.resume.pdf
+*.resume.doc
+*.resume.docx
+
+# Runtime output and dependencies
+node_modules/
+__pycache__/
+*.py[cod]
+*.log
+tmp/
+temp/
+.cache/
+
+# Editor and operating-system files
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/

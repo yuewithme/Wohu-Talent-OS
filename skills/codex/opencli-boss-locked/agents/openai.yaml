@@ -1,0 +1,4 @@
+interface:
+  display_name: "OpenCLI Boss Locked"
+  short_description: "Run BOSS Zhipin OpenCLI commands without creating new tabs."
+  default_prompt: "Run BOSS Zhipin through the locked OpenCLI workflow."

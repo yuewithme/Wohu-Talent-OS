@@ -1,0 +1,56 @@
+{
+    "name":  "hr-recruiting-workflow-kit",
+    "generatedAt":  "2026-05-18T03:30:14.9619367Z",
+    "installTargets":  {
+                           "codexSkills":  "%USERPROFILE%\\.codex\\skills",
+                           "agentSkills":  "%USERPROFILE%\\.agents\\skills"
+                       },
+    "includedSkills":  [
+                           {
+                               "group":  "codex",
+                               "name":  "hr-recruiting-orchestrator"
+                           },
+                           {
+                               "group":  "codex",
+                               "name":  "opencli-boss-locked"
+                           },
+                           {
+                               "group":  "codex",
+                               "name":  "pdf"
+                           },
+                           {
+                               "group":  "codex",
+                               "name":  "kimi-webbridge"
+                           },
+                           {
+                               "group":  "codex",
+                               "name":  "job-description-writer"
+                           },
+                           {
+                               "group":  "codex",
+                               "name":  "interview-kit-builder"
+                           },
+                           {
+                               "group":  "agents",
+                               "name":  "lark-shared"
+                           },
+                           {
+                               "group":  "agents",
+                               "name":  "lark-base"
+                           },
+                           {
+                               "group":  "agents",
+                               "name":  "lark-doc"
+                           },
+                           {
+                               "group":  "agents",
+                               "name":  "lark-drive"
+                           }
+                       ],
+    "excludedByDesign":  [
+                             "BOSS/飞书候选人原始 JSON、截图和简历证据",
+                             "本机浏览器登录态、Cookie、OpenCLI 绑定状态",
+                             "飞书 Base token、table id、record id 等业务参数",
+                             "本机 node_modules、OpenCLI 全局安装目录和 Kimi daemon 二进制"
+                         ]
+}

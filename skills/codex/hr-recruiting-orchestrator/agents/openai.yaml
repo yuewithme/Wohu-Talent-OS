@@ -1,0 +1,4 @@
+interface:
+  display_name: "HR 招聘总控"
+  short_description: "编排岗位、BOSS 候选人、飞书 Base、评分和面试方案的招聘流程总控。"
+  default_prompt: "按招聘总控流程处理这个岗位或候选人任务：先明确阶段，再使用飞书 Base 和 BOSS locked wrapper，评分与面试方案默认写回 Base。"
