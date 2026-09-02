@@ -50,6 +50,36 @@ const safetyRules = [
   "电子简历与附件简历分开处理，来源和解析状态完整留痕",
 ];
 
+const sourceSnapshot = {
+  name: "BOSS-Kimi全流程测试-20260516",
+  table: "Kimi全流程测试",
+  batch: "kimi-boss-20260516092503",
+  records: 10,
+  fields: 20,
+  views: 2,
+  revision: 25,
+};
+
+const statusSummary = [
+  { label: "已采集", count: 0, note: "等待进入评分" },
+  { label: "已评分", count: 7, note: "等待生成面试题" },
+  { label: "已生成面试题", count: 3, note: "进入 HR 审核" },
+  { label: "失败", count: 0, note: "当前无异常记录" },
+];
+
+const processRecords = [
+  { id: "01", status: "已评分", score: 0, completeness: 100, collectedMs: 122, writtenMs: null },
+  { id: "02", status: "已生成面试题", score: 66, completeness: 100, collectedMs: 122, writtenMs: 1192 },
+  { id: "03", status: "已生成面试题", score: 48, completeness: 100, collectedMs: 122, writtenMs: 1192 },
+  { id: "04", status: "已生成面试题", score: 22, completeness: 100, collectedMs: 122, writtenMs: 1192 },
+  { id: "05", status: "已评分", score: 8, completeness: 100, collectedMs: 122, writtenMs: null },
+  { id: "06", status: "已评分", score: 0, completeness: 100, collectedMs: 122, writtenMs: null },
+  { id: "07", status: "已评分", score: 8, completeness: 100, collectedMs: 122, writtenMs: null },
+  { id: "08", status: "已评分", score: 22, completeness: 100, collectedMs: 122, writtenMs: null },
+  { id: "09", status: "已评分", score: 22, completeness: 100, collectedMs: 122, writtenMs: null },
+  { id: "10", status: "已评分", score: 22, completeness: 100, collectedMs: 122, writtenMs: null },
+];
+
 function ArrowIcon() {
   return <span aria-hidden="true">↗</span>;
 }
@@ -174,8 +204,8 @@ export default function Home() {
               </section>
 
               <section className="metric-grid" aria-label="工作台结构指标">
-                <article><span>候选人记录</span><strong>10</strong><small>原 Base 当前记录数</small></article>
-                <article><span>核心业务字段</span><strong>20</strong><small>覆盖画像、评分与审计</small></article>
+                <article><span>候选人记录</span><strong>{sourceSnapshot.records}</strong><small>原 Base 当前记录数</small></article>
+                <article><span>核心业务字段</span><strong>{sourceSnapshot.fields}</strong><small>覆盖画像、评分与审计</small></article>
                 <article><span>招聘流程阶段</span><strong>07</strong><small>从岗位准备到安全触达</small></article>
                 <article><span>流程状态</span><strong>04</strong><small>采集 · 评分 · 面试题 · 失败</small></article>
               </section>
@@ -233,18 +263,33 @@ export default function Home() {
             <section className="section-page">
               <div className="section-heading">
                 <div><span className="eyebrow">CANDIDATE HUB</span><h1>候选人工作区</h1></div>
-                <p>网页不复制候选人隐私数据；实时记录继续在受权限保护的飞书 Base 中管理。</p>
+                <p>已将现有记录接入流程层；候选人隐私明细继续由飞书 Base 权限保护。</p>
               </div>
               <div className="privacy-hero">
-                <div className="privacy-mark">10</div>
-                <div><span className="eyebrow">LIVE RECORDS</span><h2>候选人记录已连接</h2><p>数据源包含 10 条记录、20 个业务字段和 2 个工作视图。</p></div>
+                <div className="privacy-mark">{sourceSnapshot.records}</div>
+                <div><span className="eyebrow">READ-ONLY SNAPSHOT · REV {sourceSnapshot.revision}</span><h2>现有记录已进入招聘流程</h2><p>{sourceSnapshot.name} · {sourceSnapshot.table} · {sourceSnapshot.fields} 个字段 · {sourceSnapshot.views} 个视图</p></div>
                 <a href={baseUrl} target="_blank" rel="noreferrer" className="primary-button large">在飞书中查看 <ArrowIcon /></a>
               </div>
               <div className="status-grid">
-                {["已采集", "已评分", "已生成面试题", "失败"].map((status, index) => (
-                  <article key={status}><span className={`status-number tone-${index + 1}`}>0{index + 1}</span><h3>{status}</h3><p>{index === 3 ? "异常原因可追溯" : "由流程状态字段驱动"}</p></article>
+                {statusSummary.map((status, index) => (
+                  <article key={status.label}><span className={`status-number tone-${index + 1}`}>{String(status.count).padStart(2, "0")}</span><h3>{status.label}</h3><p>{status.note}</p></article>
                 ))}
               </div>
+              <section className="record-section" aria-label="已接入流程记录">
+                <div className="record-section-head">
+                  <div><span className="eyebrow">PROCESS SNAPSHOT</span><h2>全部 10 条流程记录</h2></div>
+                  <span>批次 {sourceSnapshot.batch}</span>
+                </div>
+                <div className="record-grid">
+                  {processRecords.map((record) => (
+                    <article className="record-card" key={record.id}>
+                      <div className="record-card-head"><span>流程记录 {record.id}</span><strong className={record.status === "已生成面试题" ? "ready" : "scored"}>{record.status}</strong></div>
+                      <div className="record-score"><small>岗位匹配</small><b>{record.score}</b><span>/ 100</span></div>
+                      <div className="record-meta"><span>信息完整性 {record.completeness}%</span><span>采集 {record.collectedMs}ms</span><span>{record.writtenMs ? `面试题写入 ${record.writtenMs}ms` : "待生成面试题"}</span></div>
+                    </article>
+                  ))}
+                </div>
+              </section>
               <div className="privacy-note"><span>盾</span><p><strong>隐私保护</strong> 姓名、简历、原始 JSON 和面试材料不会发布到此网页。访问真实候选人信息时，飞书会继续执行原有账号权限。</p></div>
             </section>
           )}
