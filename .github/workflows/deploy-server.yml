@@ -25,7 +25,7 @@ jobs:
       CANDIDATE_CONTAINER: wohu-talent-os-candidate
     steps:
       - name: Check out repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Build website image
         run: docker build --pull --tag "$IMAGE" web
