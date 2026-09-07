@@ -54,6 +54,7 @@ const sourceSnapshot = {
   name: "BOSS-Kimi全流程测试-20260516",
   table: "Kimi全流程测试",
   batch: "kimi-boss-20260516092503",
+  syncedAt: "2026-09-07",
   records: 10,
   fields: 20,
   views: 2,
@@ -149,7 +150,7 @@ export default function Home() {
             <span className="muted">Asia / Shanghai</span>
           </div>
           <div className="top-actions">
-            <span className="status-pill"><i /> 系统就绪</span>
+            <span className="status-pill"><i /> 已同步 REV {sourceSnapshot.revision}</span>
             <a href={baseUrl} target="_blank" rel="noreferrer" className="primary-button">
               进入飞书数据源 <ArrowIcon />
             </a>
@@ -267,7 +268,7 @@ export default function Home() {
               </div>
               <div className="privacy-hero">
                 <div className="privacy-mark">{sourceSnapshot.records}</div>
-                <div><span className="eyebrow">READ-ONLY SNAPSHOT · REV {sourceSnapshot.revision}</span><h2>现有记录已进入招聘流程</h2><p>{sourceSnapshot.name} · {sourceSnapshot.table} · {sourceSnapshot.fields} 个字段 · {sourceSnapshot.views} 个视图</p></div>
+                <div><span className="eyebrow">READ-ONLY SNAPSHOT · REV {sourceSnapshot.revision} · SYNCED {sourceSnapshot.syncedAt}</span><h2>现有记录已进入招聘流程</h2><p>{sourceSnapshot.name} · {sourceSnapshot.table} · {sourceSnapshot.fields} 个字段 · {sourceSnapshot.views} 个视图</p></div>
                 <a href={baseUrl} target="_blank" rel="noreferrer" className="primary-button large">在飞书中查看 <ArrowIcon /></a>
               </div>
               <div className="status-grid">
@@ -317,7 +318,7 @@ export default function Home() {
 
         <footer>
           <span>Wohu Talent OS · HR Recruiting Workspace</span>
-          <span>原始 Base 保持不变 · 网页不承载候选人隐私数据</span>
+          <span>最新同步 {sourceSnapshot.syncedAt} · 原始 Base 保持不变 · 网页不承载候选人隐私数据</span>
         </footer>
       </section>
     </main>
