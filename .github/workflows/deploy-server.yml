@@ -1,0 +1,91 @@
+name: Deploy HR Workbench to 150 Server
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "web/**"
+      - ".github/workflows/deploy-server.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: production-150-server
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: [self-hosted, Linux, X64, wohu-production]
+    timeout-minutes: 20
+    env:
+      IMAGE: wohu-talent-os:${{ github.sha }}
+      CONTAINER: wohu-talent-os
+      CANDIDATE_CONTAINER: wohu-talent-os-candidate
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Build website image
+        run: docker build --pull --tag "$IMAGE" web
+
+      - name: Verify and deploy on port 18081
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          previous_image="$(docker inspect --format='{{.Config.Image}}' "$CONTAINER" 2>/dev/null || true)"
+
+          cleanup_candidate() {
+            docker rm --force "$CANDIDATE_CONTAINER" >/dev/null 2>&1 || true
+          }
+          trap cleanup_candidate EXIT
+
+          cleanup_candidate
+          docker run \
+            --detach \
+            --name "$CANDIDATE_CONTAINER" \
+            --publish 127.0.0.1:18082:18081 \
+            "$IMAGE"
+
+          for attempt in {1..20}; do
+            if curl --fail --silent --show-error http://127.0.0.1:18082/ >/dev/null; then
+              break
+            fi
+            if [ "$attempt" -eq 20 ]; then
+              echo "Candidate container failed its health check."
+              exit 1
+            fi
+            sleep 1
+          done
+
+          cleanup_candidate
+          docker rm --force "$CONTAINER" >/dev/null 2>&1 || true
+          docker run \
+            --detach \
+            --name "$CONTAINER" \
+            --restart unless-stopped \
+            --publish 18081:18081 \
+            "$IMAGE"
+
+          for attempt in {1..20}; do
+            if curl --fail --silent --show-error http://127.0.0.1:18081/ >/dev/null; then
+              docker container inspect --format='{{.State.Status}}' "$CONTAINER"
+              exit 0
+            fi
+            sleep 1
+          done
+
+          echo "Production container failed its health check."
+          docker rm --force "$CONTAINER" >/dev/null 2>&1 || true
+          if [ -n "$previous_image" ]; then
+            docker run \
+              --detach \
+              --name "$CONTAINER" \
+              --restart unless-stopped \
+              --publish 18081:18081 \
+              "$previous_image"
+            echo "Previous image restored: $previous_image"
+          fi
+          exit 1

@@ -1,12 +1,12 @@
 import type { NextConfig } from "next";
 
 const isPagesBuild = process.env.NEXT_OUTPUT_EXPORT === "1";
-const pagesBasePath = isPagesBuild ? "/Wohu-Talent-OS" : "";
+const staticBasePath = process.env.NEXT_BASE_PATH ?? "";
 
 const nextConfig: NextConfig = {
   ...(isPagesBuild ? { output: "export" } : {}),
-  basePath: pagesBasePath,
-  assetPrefix: pagesBasePath,
+  basePath: staticBasePath,
+  assetPrefix: staticBasePath,
   images: { unoptimized: true },
 };
 
