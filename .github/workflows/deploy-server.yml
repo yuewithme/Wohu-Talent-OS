@@ -30,7 +30,7 @@ jobs:
       - name: Build website image
         run: docker build --pull --tag "$IMAGE" web
 
-      - name: Verify and deploy on port 18081
+      - name: Verify and deploy on port 18083
         shell: bash
         run: |
           set -euo pipefail
@@ -46,11 +46,11 @@ jobs:
           docker run \
             --detach \
             --name "$CANDIDATE_CONTAINER" \
-            --publish 127.0.0.1:18082:18081 \
+            --publish 127.0.0.1:18084:18083 \
             "$IMAGE"
 
           for attempt in {1..20}; do
-            if curl --fail --silent --show-error http://127.0.0.1:18082/ >/dev/null; then
+            if curl --fail --silent --show-error http://127.0.0.1:18084/ >/dev/null; then
               break
             fi
             if [ "$attempt" -eq 20 ]; then
@@ -66,11 +66,11 @@ jobs:
             --detach \
             --name "$CONTAINER" \
             --restart unless-stopped \
-            --publish 18081:18081 \
+            --publish 18083:18083 \
             "$IMAGE"
 
           for attempt in {1..20}; do
-            if curl --fail --silent --show-error http://127.0.0.1:18081/ >/dev/null; then
+            if curl --fail --silent --show-error http://127.0.0.1:18083/ >/dev/null; then
               docker container inspect --format='{{.State.Status}}' "$CONTAINER"
               exit 0
             fi
@@ -84,7 +84,7 @@ jobs:
               --detach \
               --name "$CONTAINER" \
               --restart unless-stopped \
-              --publish 18081:18081 \
+              --publish 18083:18083 \
               "$previous_image"
             echo "Previous image restored: $previous_image"
           fi
