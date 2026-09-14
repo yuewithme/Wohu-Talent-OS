@@ -37,6 +37,8 @@ Chrome / Edge MV3 插件与统一同步服务。配置后，打开 BOSS 招聘�
 5. 为独立域名配置 HTTPS 反向代理到 `127.0.0.1:18084`，请求体限制至少 30 MB，读写超时至少 60 秒。不要把访问凭证放入 URL。
 6. 验证 `/healthz`，再使用访问凭证验证 `/v1/status`；后者检查应用授权和目标字段。
 
+本项目附带独立 HTTPS 网关：填写 `SYNC_PUBLIC_HOST`（域名或公网 IPv4），再执行 `docker compose -f compose.yaml -f compose.https.yaml up -d`。网关仅使用 TCP 443，以 TLS-ALPN 验证申请 Let's Encrypt 短期证书，并由 Caddy 自动续期；云端入站规则须允许公网 TCP 443。已有反向代理时可继续只运行基础 compose。
+
 | 接口 | 用途 |
 |---|---|
 | `GET /healthz` | 进程健康，不要求认证 |
@@ -66,3 +68,5 @@ node --env-file=server/.env --import tsx server/index.ts
 开发使用 Node.js 24+。本地联调允许 `http://127.0.0.1:8787`，其他电脑正式使用 HTTPS 服务地址。已有 v0.2.1 候选人手动读取基线保存在同名 Git 标签；当前交付入口为消息附件自动归档。
 
 真实联调结果、限制与尚未完成项见 `docs/development/2026-09-14-resume-auto-sync.md`。构建通过不代表已通过真实附件到飞书的全链路验收。
+
+2026-09-14 已在真实 Edge 中归档 2 份 BOSS 附件，飞书回下载文件名与 SHA256 一致；历史重扫、重复上传及服务重建后保留记录均已验证。公网 HTTPS 入口正在检查云端 443 入站规则，现阶段本机通过 SSH 隧道连接云服务。
