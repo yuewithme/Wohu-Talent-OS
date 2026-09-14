@@ -6,9 +6,11 @@ import { dateRange, education, email, experience, phone } from '../src/adapter/n
 import { canvasHeaderCandidate, cardCandidate, canvasLines, projectCard, resolveFields, type Glyph } from '../src/adapter/sources';
 import { incomingAttachment,attachmentKey } from '../src/sync/contracts';
 
-test('API 地址只接受无路径无凭证的 HTTPS 或本机开发服务', () => {
+test('API 地址接受 HTTPS、本机服务及指定的 18083 入口，拒绝其他 HTTP 地址', () => {
   assert.equal(apiOrigin(' https://ats.example.com/ '), 'https://ats.example.com');
   assert.equal(apiOrigin('http://localhost:3001'), 'http://localhost:3001');
+  assert.equal(apiOrigin('http://150.158.52.233:18083/'),'http://150.158.52.233:18083');
+  for(const value of ['http://150.158.52.233','http://150.158.52.233:18084','http://150.158.52.233.evil.test:18083','http://150.158.52.233:18083/v1','http://user:secret@150.158.52.233:18083'])assert.throws(()=>apiOrigin(value));
   for (const value of ['http://ats.example.com','https://user:secret@ats.example.com','https://ats.example.com/api/v1','https://ats.example.com/?token=secret','https://ats.example.com/#token','https://www.zhipin.com','https://open.feishu.cn']) assert.throws(()=>apiOrigin(value));
   assert.equal(hostPattern('https://ats.example.com:8443'),'https://ats.example.com/*');
 });

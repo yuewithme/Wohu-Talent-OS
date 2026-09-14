@@ -2,16 +2,16 @@
   "manifest_version": 3,
   "name": "沃虎人才 · 招聘助手",
   "description": "自动识别 BOSS 消息中的简历附件，同步到飞书多维表格，支持历史补录和去重。",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "minimum_chrome_version": "120",
   "permissions": ["activeTab", "scripting", "storage", "unlimitedStorage", "alarms"],
-  "host_permissions": ["https://www.zhipin.com/*", "https://docdownload.zhipin.com/*"],
+  "host_permissions": ["https://www.zhipin.com/*", "https://docdownload.zhipin.com/*", "http://150.158.52.233/*"],
   "optional_host_permissions": ["https://*/*", "http://localhost/*", "http://127.0.0.1/*"],
   "background": { "service_worker": "background.js", "type": "module" },
   "action": { "default_popup": "popup.html", "default_title": "沃虎人才 · 简历自动归档" },
   "options_ui": { "page": "options.html", "open_in_tab": true },
   "icons": { "16": "icons/16.png", "32": "icons/32.png", "48": "icons/48.png", "128": "icons/128.png" },
   "content_security_policy": {
-    "extension_pages": "script-src 'self'; object-src 'none'; connect-src https: http://localhost:* http://127.0.0.1:*; base-uri 'none'; frame-ancestors 'none'"
+    "extension_pages": "script-src 'self'; object-src 'none'; connect-src https: http://150.158.52.233:18083 http://localhost:* http://127.0.0.1:*; base-uri 'none'; frame-ancestors 'none'"
   }
 }

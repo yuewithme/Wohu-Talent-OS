@@ -107,5 +107,5 @@ export function installResumeSync(){
   chrome.alarms.onAlarm.addListener(a=>{if(a.name===alarm)void tick();});
   chrome.tabs.onUpdated.addListener((_id,change,tab)=>{if(change.status==='complete'&&isBossUrl(tab.url))void tick();});
   const init=()=>void config().then(async c=>{if(c.enabled){await chrome.alarms.create(alarm,{periodInMinutes:.5});void tick();}});
-  chrome.runtime.onStartup.addListener(init);chrome.runtime.onInstalled.addListener(init);init();
+  chrome.runtime.onStartup.addListener(init);chrome.runtime.onInstalled.addListener(details=>{init();if(details.reason==='install')void chrome.runtime.openOptionsPage();});init();
 }

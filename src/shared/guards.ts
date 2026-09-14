@@ -1,11 +1,15 @@
 import { AppError } from './errors';
 import { type CommitBody, type ImportAction, type Preview } from './contracts';
 
+export const SYNC_SERVICE_ORIGIN = 'http://150.158.52.233:18083';
+
 export function apiOrigin(value: string): string {
   try {
     const url = new URL(value.trim());
     const local = ['localhost','127.0.0.1'].includes(url.hostname);
-    if (url.username || url.password || url.search || url.hash || (url.pathname !== '/' && url.pathname !== '') || (url.protocol !== 'https:' && !(local && url.protocol === 'http:'))) throw new Error();
+    // The existing gateway is an explicitly selected HTTP endpoint; other remote HTTP origins remain rejected.
+    const configuredGateway = url.origin === SYNC_SERVICE_ORIGIN;
+    if (url.username || url.password || url.search || url.hash || (url.pathname !== '/' && url.pathname !== '') || (url.protocol !== 'https:' && !(local && url.protocol === 'http:') && !configuredGateway)) throw new Error();
     if (url.hostname === 'zhipin.com' || url.hostname.endsWith('.zhipin.com') || url.hostname === 'open.feishu.cn') throw new Error();
     return url.origin;
   } catch { throw new AppError('INVALID_API_ORIGIN'); }
