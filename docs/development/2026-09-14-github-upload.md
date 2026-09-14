@@ -17,4 +17,4 @@
 
 - GitHub SSH 认证成功，身份为 yuewithme。
 - 已扫描本地现有提交历史中的 66 个文件对象，未发现实际应用密钥、同步凭证、私钥、简历附件或数据库文件；本地 .env、.local、server/data 和生成安装包均已忽略。
-- 用户明确授权备份旧 main 后，以当前项目替换 main。现有近似名称仓库为 yuewithme/Wohu-Talent-OS，当前旧 main 为 e996a417676b1e9ee429fead5b350b544b9832ec；因名称与用户最初描述不同，等待目标确认后执行远端写入。
+- 用户已明确确认目标为 yuewithme/Wohu-Talent-OS，并授权备份旧 main 后以当前项目替换 main。远端旧 main 为 e996a417676b1e9ee429fead5b350b544b9832ec，计划保存至 archive/main-before-resume-sync-20260914。
