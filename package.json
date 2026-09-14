@@ -1,0 +1,31 @@
+{
+  "name": "wohu-talent-extension",
+  "version": "0.2.1",
+  "private": true,
+  "type": "module",
+  "description": "BOSS 候选人读取与 ATS 导入 Chrome MV3 插件",
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "typecheck": "tsc --noEmit",
+    "check": "npm run typecheck && npm run build",
+    "test": "node --import tsx --test tests/*.test.ts",
+    "package": "npm run check && node scripts/package.mjs"
+  },
+  "dependencies": {
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
+    "zod": "^4.0.0"
+  },
+  "devDependencies": {
+    "@types/chrome": "^0.1.0",
+    "@types/node": "^24.0.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "esbuild": "^0.28.2",
+    "tsx": "^4.0.0",
+    "typescript": "^7.0.2"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}
