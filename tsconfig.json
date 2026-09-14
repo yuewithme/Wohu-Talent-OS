@@ -12,5 +12,5 @@
     "esModuleInterop": true,
     "types": ["chrome", "node"]
   },
-  "include": ["src", "tests"]
+  "include": ["src", "server", "tests"]
 }

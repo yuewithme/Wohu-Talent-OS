@@ -4,6 +4,7 @@ import { CandidateSchema, CaptureRecordSchema, SourceRecordSchema, type Preview 
 import { apiOrigin, commitDecision, hostPattern, isBossUrl, safeRecordUrl, supportedActions, versionOlder } from '../src/shared/guards';
 import { dateRange, education, email, experience, phone } from '../src/adapter/normalize';
 import { canvasHeaderCandidate, cardCandidate, canvasLines, projectCard, resolveFields, type Glyph } from '../src/adapter/sources';
+import { incomingAttachment,attachmentKey } from '../src/sync/contracts';
 
 test('API 地址只接受无路径无凭证的 HTTPS 或本机开发服务', () => {
   assert.equal(apiOrigin(' https://ats.example.com/ '), 'https://ats.example.com');
@@ -110,4 +111,16 @@ test('新采集契约保留多来源证据和全文，拒绝未知来源方法',
   const record={source:'boss',source_url:'https://www.zhipin.com/web/chat/recommend',captured_at:'2026-09-12T12:00:00Z',extractor_version:'boss-adapter-0.2.0',candidate:{name:'测试人',resume_text:'完整绘制文字',age:30,recent_interest:{title:'工程师'}},evidence:[{field:'candidate.name',value:'测试人',source:'boss',method:'runtime',confidence:.95,selector_version:'v2',subject_key:'candidate_1',locator:'base.name',captured_at:'2026-09-12T12:00:00Z'}]};
   assert.equal(SourceRecordSchema.parse(record).candidate.resume_text,'完整绘制文字');
   assert.equal(SourceRecordSchema.safeParse({...record,evidence:[{...record.evidence[0],method:'guessed'}]}).success,false);
+});
+
+test('消息附件只识别入站文件，排除其他候选人、在线卡片和发出的文件',()=>{
+  const contact={friendId:123456,name:'测试人',jobName:'工程师',encryptUid:'candidate_123456',friendSource:0};
+  const message={from:{uid:123456,name:'测试人'},to:{uid:654321},mid:123,time:1789373511566,body:{hyperLink:{hyperLinkType:9,text:'简历.pdf',url:'bosszp://bosszhipin.app/openwith?type=selectResumePreviewUrl&encryptId=resume_123456&authType=1'}}};
+  const item=incomingAttachment(message,contact,'654321')!;
+  assert.equal(item.meta.filename,'简历.pdf');assert.equal(item.encrypted_uid,'candidate_123456');
+  assert.equal(attachmentKey(item.meta),'654321:123456:123:resume_123456');
+  assert.equal(incomingAttachment({...message,from:message.to,to:message.from},contact,'654321'),undefined);
+  assert.equal(incomingAttachment(message,{...contact,friendId:999999},'654321'),undefined);
+  assert.equal(incomingAttachment({...message,body:{resume:{}}},contact,'654321'),undefined);
+  assert.equal(incomingAttachment({...message,body:{hyperLink:{...message.body.hyperLink,url:'https://evil.test/file.pdf'}}},contact,'654321'),undefined);
 });

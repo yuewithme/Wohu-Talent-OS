@@ -1,0 +1,19 @@
+services:
+  resume-sync:
+    build:
+      context: .
+      dockerfile: server/Dockerfile
+    restart: unless-stopped
+    env_file: server/.env
+    environment:
+      HOST: 0.0.0.0
+      PORT: 8787
+      DATA_DIR: /data
+    ports:
+      - "127.0.0.1:18084:8787"
+    volumes:
+      - resume-data:/data
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+volumes:
+  resume-data:

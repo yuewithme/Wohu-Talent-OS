@@ -8,7 +8,8 @@ await Promise.all([
   build({ entryPoints: ['src/background/index.ts'], outfile: 'dist/background.js', bundle: true, format: 'esm', target: 'chrome120', minify: true }),
   build({ entryPoints: ['src/content/index.ts'], outfile: 'dist/content.js', bundle: true, format: 'iife', target: 'chrome120', minify: true }),
   build({ entryPoints: ['src/content/main.ts'], outfile: 'dist/main.js', bundle: true, format: 'iife', target: 'chrome120', minify: true }),
-  build({ entryPoints: { popup: 'src/ui/popup.tsx', options: 'src/ui/options.tsx' }, outdir: 'dist', bundle: true, format: 'esm', target: 'chrome120', minify: true, define: { 'process.env.NODE_ENV': '"production"' } }),
+  build({ entryPoints: ['src/content/chat.ts'], outfile: 'dist/chat.js', bundle: true, format: 'iife', target: 'chrome120', minify: true }),
+  build({ entryPoints: { popup: 'src/ui/sync-popup.tsx', options: 'src/ui/sync-options.tsx' }, outdir: 'dist', bundle: true, format: 'esm', target: 'chrome120', minify: true, define: { 'process.env.NODE_ENV': '"production"' } }),
 ]);
 
 // Generate a small code-native geometric icon, keeping the extension self-contained.

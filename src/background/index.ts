@@ -8,6 +8,7 @@ import { AppError, safeError } from '../shared/errors';
 import { apiOrigin, commitDecision, isBossUrl } from '../shared/guards';
 import { api, authenticate } from './api';
 import { clearSession, pending, saveDraft, session, settings, storageReady } from './storage';
+import { installResumeSync } from './resume-sync';
 
 const noPayload = z.undefined();
 const requestSchema = {
@@ -234,6 +235,7 @@ function sequential<T>(task: () => Promise<T>): Promise<T> {
   const next = queue.then(task, task); queue = next.catch(() => undefined); return next;
 }
 chrome.runtime.onMessage.addListener((input, sender, respond) => {
+  if(input?.channel==='resume-sync')return;
   const allowedPages = ['popup.html','options.html'].map(page => chrome.runtime.getURL(page));
   if (sender.id !== chrome.runtime.id || !sender.url || !allowedPages.includes(sender.url.split('?')[0].split('#')[0]) || sender.tab?.url && isBossUrl(sender.tab.url)) return;
   const message = MessageSchema.safeParse(input);
@@ -245,3 +247,4 @@ chrome.alarms.onAlarm.addListener(alarm => {
   if (alarm.name === 'import-status') void sequential(() => queryStatus(crypto.randomUUID())).catch(() => undefined);
 });
 chrome.runtime.onStartup.addListener(() => { void pending().then(item => { if (item) return chrome.alarms.create('import-status', { periodInMinutes: 1 }); }); });
+installResumeSync();

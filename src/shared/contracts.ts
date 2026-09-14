@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-export const VERSION = '0.2.1';
+export const VERSION = '0.3.0';
 export const ADAPTER_VERSION = 'boss-adapter-0.2.1';
 export const MAX_PAYLOAD_BYTES = 1_048_576;
 const text = z.string().trim().min(1).max(500);

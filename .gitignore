@@ -5,3 +5,6 @@ release/
 !.env.example
 *.log
 .DS_Store
+.local/
+server/data/
+*.sqlite*
