@@ -1,11 +1,21 @@
 import { build } from 'esbuild';
 import { cp, mkdir, readFile, writeFile } from 'node:fs/promises';
 import { deflateSync } from 'node:zlib';
+import { parseEnv } from 'node:util';
+
+let clientToken = process.env.SYNC_ACCESS_TOKEN;
+if (!clientToken) {
+  try { clientToken = parseEnv(await readFile('server/.env', 'utf8')).SYNC_ACCESS_TOKEN; }
+  catch (error) { if (error.code !== 'ENOENT') throw error; }
+}
+if (!clientToken || clientToken.length < 32 || clientToken.length > 500) {
+  throw new Error('Internal package requires SYNC_ACCESS_TOKEN in the environment or server/.env.');
+}
 
 await mkdir('dist', { recursive: true });
 await cp('public', 'dist', { recursive: true });
 await Promise.all([
-  build({ entryPoints: ['src/background/index.ts'], outfile: 'dist/background.js', bundle: true, format: 'esm', target: 'chrome120', minify: true }),
+  build({ entryPoints: ['src/background/index.ts'], outfile: 'dist/background.js', bundle: true, format: 'esm', target: 'chrome120', minify: true, define: { __SYNC_ACCESS_TOKEN__: JSON.stringify(clientToken) } }),
   build({ entryPoints: ['src/content/index.ts'], outfile: 'dist/content.js', bundle: true, format: 'iife', target: 'chrome120', minify: true }),
   build({ entryPoints: ['src/content/main.ts'], outfile: 'dist/main.js', bundle: true, format: 'iife', target: 'chrome120', minify: true }),
   build({ entryPoints: ['src/content/chat.ts'], outfile: 'dist/chat.js', bundle: true, format: 'iife', target: 'chrome120', minify: true }),
@@ -35,4 +45,4 @@ for (const size of [16, 32, 48, 128]) {
   await writeFile(`dist/icons/${size}.png`, Buffer.concat([Buffer.from([137,80,78,71,13,10,26,10]), chunk('IHDR', head), chunk('IDAT', deflateSync(raw)), chunk('IEND', Buffer.alloc(0))]));
 }
 const manifest = JSON.parse(await readFile('dist/manifest.json', 'utf8'));
-console.log(`Built ${manifest.name} ${manifest.version} → dist/`);
+console.log(`Built ${manifest.name} ${manifest.version} → dist/ (internal distribution only)`);

@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "沃虎人才 · 招聘助手",
   "description": "自动识别 BOSS 消息中的简历附件，同步到飞书多维表格，支持历史补录和去重。",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "minimum_chrome_version": "120",
   "permissions": ["activeTab", "scripting", "storage", "unlimitedStorage", "alarms"],
   "host_permissions": ["https://www.zhipin.com/*", "https://docdownload.zhipin.com/*", "http://150.158.52.233/*"],

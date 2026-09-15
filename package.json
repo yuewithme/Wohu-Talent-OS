@@ -1,6 +1,6 @@
 {
   "name": "wohu-talent-extension",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "private": true,
   "type": "module",
   "description": "BOSS 候选人读取与 ATS 导入 Chrome MV3 插件",

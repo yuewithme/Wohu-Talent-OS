@@ -15,7 +15,7 @@ function Popup(){
   return <div className="popup-shell"><header className="app-header"><Brand/><button className="icon-button" aria-label="同步设置" onClick={()=>chrome.runtime.openOptionsPage()}><Icon name="settings"/></button></header><main className="popup-content">
     <div className="section-heading"><h1>简历自动归档</h1><span className="source-tag">v{VERSION}</span></div>
     <p className="helper">收到 BOSS 附件简历后自动保存到飞书多维表格。</p>
-    <div className="notice neutral"><strong>{s?.settings.enabled?'自动同步已启用':'自动同步未启用'}</strong><p>{s?.running?'正在扫描会话并处理附件':s?.state.last_error?syncError(s.state.last_error):s?.settings.enabled?'打开 BOSS 后自动开始，每 30 秒检查一次。':'请先配置同步服务并启用。'}</p></div>
+    <div className="notice neutral"><strong>{s?.settings.enabled?'自动同步已启用':'自动同步已暂停'}</strong><p>{s?.running?'正在扫描会话并处理附件':s?.state.last_error?syncError(s.state.last_error):s?.settings.enabled?'打开 BOSS 后自动开始，每 30 秒检查一次。':'可在同步设置中恢复。'}</p></div>
     <div className="sync-counts"><span><b>{done}</b> 已归档</span><span><b>{jobs.length-done-failed}</b> 处理中</span><span><b>{failed}</b> 需处理</span></div>
     <p className="helper">已扫描 {Object.values(s?.state.cursors||{}).filter(c=>c.done).length} / {s?.state.contacts.length||0} 个可访问会话。{s?.state.scope_note}</p>
     {s?.state.last_scan&&<p className="helper">最近检查：{new Date(s.state.last_scan).toLocaleString()}</p>}

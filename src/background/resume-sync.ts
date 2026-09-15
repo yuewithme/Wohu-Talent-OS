@@ -1,10 +1,16 @@
-import { AttachmentSchema, EMPTY_SYNC, MAX_RESUME_BYTES, SYNC_DEFAULTS, SyncSettingsSchema, attachmentKey, type Contact, type SyncSettings, type SyncState } from '../sync/contracts';
+import { AttachmentSchema, EMPTY_SYNC, MAX_RESUME_BYTES, SYNC_DEFAULTS, SyncSettingsSchema, SyncPreferencesSchema, attachmentKey, type Contact, type SyncSettings, type SyncState } from '../sync/contracts';
 import { apiOrigin, hostPattern, isBossUrl } from '../shared/guards';
 import { storageReady } from './storage';
 
 let running=false;
 const alarm='resume-sync';
-async function config(){await storageReady;const d=await chrome.storage.local.get('resumeSyncSettings');return SyncSettingsSchema.parse(d.resumeSyncSettings||SYNC_DEFAULTS);}
+declare const __SYNC_ACCESS_TOKEN__:string;
+const syncReady=storageReady.then(async()=>{
+  const d=await chrome.storage.local.get('resumeSyncProvisioned');
+  // Migrate once; later restarts and upgrades must preserve an intentional pause.
+  if(!d.resumeSyncProvisioned)await chrome.storage.local.set({resumeSyncSettings:SYNC_DEFAULTS,resumeSyncProvisioned:true});
+});
+async function config(){await syncReady;const d=await chrome.storage.local.get('resumeSyncSettings');return {...SyncSettingsSchema.parse(d.resumeSyncSettings||SYNC_DEFAULTS),service_origin:SYNC_DEFAULTS.service_origin,token:__SYNC_ACCESS_TOKEN__};}
 async function state():Promise<SyncState>{await storageReady;return (await chrome.storage.local.get('resumeSyncState')).resumeSyncState as SyncState||structuredClone(EMPTY_SYNC);}
 async function save(s:SyncState){await chrome.storage.local.set({resumeSyncState:s});}
 async function api(c:SyncSettings,path:string,body?:unknown){
@@ -12,11 +18,19 @@ async function api(c:SyncSettings,path:string,body?:unknown){
   const d=await r.json();if(!r.ok)throw Error(typeof d.error==='string'?d.error:`SERVICE_HTTP_${r.status}`);return d;
 }
 async function chatTab(){
+  await storageReady;
   const tabs=await chrome.tabs.query({url:'https://www.zhipin.com/*'});
   if(!tabs.length)throw Error('WAITING_BOSS');
-  const existing=tabs.find(t=>t.url&&new URL(t.url).pathname==='/web/chat/index'&&new URL(t.url).searchParams.get('wohu_sync')==='1');
+  const saved=(await chrome.storage.session.get('resumeSyncTabId')).resumeSyncTabId;
+  const owned=tabs.find(t=>t.id===saved);
+  const existing=[...(owned?[owned]:[]),...tabs].find(t=>t.url&&new URL(t.url).pathname==='/web/chat/index');
   if(existing?.id)return existing.id;
-  await chrome.tabs.create({url:'https://www.zhipin.com/web/chat/index?wohu_sync=1',active:false});throw Error('CHAT_NOT_READY');
+  const source=owned||tabs.find(t=>t.active)||tabs[0];
+  const login=await chrome.scripting.executeScript({target:{tabId:source.id!},world:'MAIN',func:()=>/^\d+$/.test(String((window as any).iBossRoot?.user?.val?.userId||''))}).catch(()=>[]);
+  if(!login[0]?.result)throw Error('WAITING_BOSS_LOGIN');
+  // Login redirects may drop the query marker; retain the owned tab across those redirects.
+  const tab=owned?.id?await chrome.tabs.update(owned.id,{url:'https://www.zhipin.com/web/chat/index?wohu_sync=1'}):await chrome.tabs.create({url:'https://www.zhipin.com/web/chat/index?wohu_sync=1',active:false});
+  if(tab?.id!==undefined)await chrome.storage.session.set({resumeSyncTabId:tab.id});throw Error('CHAT_NOT_READY');
 }
 async function page<T>(tab:number,type:string,args:unknown={}):Promise<T>{
   await chrome.scripting.executeScript({target:{tabId:tab},world:'MAIN',files:['chat.js']});
@@ -39,11 +53,9 @@ export async function saveSync(input:unknown){
   if(running)throw Error('SYNC_BUSY');
   running=true;
   try{
-  const c=SyncSettingsSchema.parse(input),old=await config();if(!c.token)c.token=old.token;
-  if(c.enabled){c.service_origin=apiOrigin(c.service_origin);if(!c.token)throw Error('SYNC_TOKEN_REQUIRED');if(!await chrome.permissions.contains({origins:[hostPattern(c.service_origin)]}))throw Error('HOST_PERMISSION_REQUIRED');await api(c,'/v1/status');}
-  if(old.service_origin&&old.service_origin!==c.service_origin&&(await state()).jobs.some(j=>j.status!=='done'))throw Error('SYNC_DESTINATION_HAS_PENDING_JOBS');
-  if(old.service_origin&&old.service_origin!==c.service_origin)await save(structuredClone(EMPTY_SYNC));
-  await chrome.storage.local.set({resumeSyncSettings:c});
+  const c={...await config(),...SyncPreferencesSchema.parse(input)};
+  if(c.enabled){if(!await chrome.permissions.contains({origins:[hostPattern(c.service_origin)]}))throw Error('HOST_PERMISSION_REQUIRED');await api(c,'/v1/status');}
+  await chrome.storage.local.set({resumeSyncSettings:{...c,token:''}});
   if(c.enabled)await chrome.alarms.create(alarm,{periodInMinutes:.5});else await chrome.alarms.clear(alarm);
   }finally{running=false;}
   void tick();return syncStatus();
@@ -107,5 +119,5 @@ export function installResumeSync(){
   chrome.alarms.onAlarm.addListener(a=>{if(a.name===alarm)void tick();});
   chrome.tabs.onUpdated.addListener((_id,change,tab)=>{if(change.status==='complete'&&isBossUrl(tab.url))void tick();});
   const init=()=>void config().then(async c=>{if(c.enabled){await chrome.alarms.create(alarm,{periodInMinutes:.5});void tick();}});
-  chrome.runtime.onStartup.addListener(init);chrome.runtime.onInstalled.addListener(details=>{init();if(details.reason==='install')void chrome.runtime.openOptionsPage();});init();
+  chrome.runtime.onStartup.addListener(init);chrome.runtime.onInstalled.addListener(init);init();
 }

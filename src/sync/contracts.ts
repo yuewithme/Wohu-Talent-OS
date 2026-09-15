@@ -9,7 +9,8 @@ export const AttachmentSchema=z.object({meta:ResumeMetaSchema,encrypted_uid:id,r
 export type Attachment=z.infer<typeof AttachmentSchema>;
 export const SyncSettingsSchema=z.object({enabled:z.boolean().default(false),service_origin:z.string().default(''),token:z.string().max(500).default(''),backfill:z.boolean().default(true)}).strict();
 export type SyncSettings=z.infer<typeof SyncSettingsSchema>;
-export const SYNC_DEFAULTS:SyncSettings={enabled:false,service_origin:SYNC_SERVICE_ORIGIN,token:'',backfill:true};
+export const SYNC_DEFAULTS:SyncSettings={enabled:true,service_origin:SYNC_SERVICE_ORIGIN,token:'',backfill:true};
+export const SyncPreferencesSchema=z.object({enabled:z.boolean(),backfill:z.boolean()}).strict();
 export interface Contact {id:string;name:string;job:string;last_message:string;source:number}
 export interface Cursor {max_id:string;page:number;done:boolean;last_message:string}
 export interface SyncJob {key:string;attachment:Attachment;status:'pending'|'retry'|'syncing'|'done'|'blocked';attempts:number;next_at:number;error?:string;server_key?:string;record_url?:string;created_at:number;updated_at:number}
